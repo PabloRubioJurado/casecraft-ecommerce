@@ -30,18 +30,18 @@ Semester Project for the **E-Commerce Course (Academic Year 2026–2027)**.
 ## 4. Requirements Status & Roadmap (`A1`–`A12` & Bonuses)
 | Code | Requirement | Owner | Target Week | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `A1` | Product catalog (max 24/page, categories, details) | [Nombre Compañero 2] | Week 6 (P2) | Planned |
-| `A2` | Basic search by product name | [Nombre Compañero 2] | Week 8 | Planned |
-| `A3` | Persistent shopping cart & server-side recalculation | [Nombre Compañero 3] | Week 8 | Planned |
-| `A4` | User accounts (Argon2/bcrypt + delivery address) | [Nombre Compañero 3] | Week 6 (P2) | Planned |
-| `A5` | Multi-step checkout (2+ delivery methods) | [Nombre Compañero 2] | Week 9 | Planned |
+| `A1` | Product catalog (max 24/page, categories, details) | Dario Lopez Campos | Week 6 (P2) | Planned |
+| `A2` | Basic search by product name | Dario Lopez Campos | Week 8 | Planned |
+| `A3` | Persistent shopping cart & server-side recalculation | Jaime Ballester Lara | Week 8 | Planned |
+| `A4` | User accounts (Argon2/bcrypt + delivery address) | Jaime Ballester Lara | Week 6 (P2) | Planned |
+| `A5` | Multi-step checkout (2+ delivery methods) | Dario Lopez Campos | Week 9 | Planned |
 | `A6` | Sandbox payment via Stripe Webhook | Pablo Rubio Jurado | Week 9 | Planned |
 | `A7` | Stock management & concurrency control | Pablo Rubio Jurado | Week 9 | Planned |
-| `A8` | Customer order history | [Nombre Compañero 3] | Week 10 | Planned |
-| `A9` | Custom administration panel (CRUD + order statuses) | [Nombre Compañero 3] | Week 10 | Planned |
+| `A8` | Customer order history | Jaime Ballester Lara | Week 10 | Planned |
+| `A9` | Custom administration panel (CRUD + order statuses) | Jaime Ballester Lara | Week 10 | Planned |
 | `A10` | Basic security (validation, CSRF, ORM, server RBAC) | Pablo Rubio Jurado | Week 8 | Planned |
-| `A11` | Responsive design (360 px screen support) | [Nombre Compañero 2] | Week 11 | Planned |
-| `A12` | Automated tests (10+ tests via single command) | Pablo Rubio Jurado & [Nombre Compañero 3] | Week 11 | Planned |
+| `A11` | Responsive design (360 px screen support) | Dario Lopez Campos | Week 11 | Planned |
+| `A12` | Automated tests (10+ tests via single command) | Dario Lopez Campos & Jaime Ballester Lara | Week 11 | Planned |
 
 **Planned Bonus Features (for P2 approval):** `B1` Filtered search (5 pts), `B5` Discount codes (3 pts), `B6` Transactional email via Mailtrap (5 pts).
 
