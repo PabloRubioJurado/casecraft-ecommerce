@@ -1,0 +1,50 @@
+{
+  "name": "casecraft-ecommerce",
+  "version": "1.0.0",
+  "description": "Semester Project for the **E-Commerce Course (Academic Year 2026–2027)**.\r * **Current Stage:** `P1` — Team Setup and Planning (Week 3)\r * **Repository URL:** https://github.com/PabloRubioJurado/casecraft-ecommerce\r * **Release Tag:** `P1`",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:seed": "prisma db seed",
+    "db:push": "prisma db push"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PabloRubioJurado/casecraft-ecommerce.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PabloRubioJurado/casecraft-ecommerce/issues"
+  },
+  "homepage": "https://github.com/PabloRubioJurado/casecraft-ecommerce#readme",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "next": "^16.4.6",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "autoprefixer": "^10.6.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.6",
+    "postcss": "^8.5.32",
+    "prisma": "^7.10.1",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.19.0",
+    "typescript": "^6.0.3"
+  }
+}
