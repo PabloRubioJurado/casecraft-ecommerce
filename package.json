@@ -1,0 +1,34 @@
+{
+  "name": "casecraft-ecommerce",
+  "version": "1.0.0",
+  "description": "Semester Project for the **E-Commerce Course (Academic Year 2026–2027)**.\r * **Current Stage:** `P1` — Team Setup and Planning (Week 3)\r * **Repository URL:** https://github.com/PabloRubioJurado/casecraft-ecommerce\r * **Release Tag:** `P1`",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "prisma skills sync || exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PabloRubioJurado/casecraft-ecommerce.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PabloRubioJurado/casecraft-ecommerce/issues"
+  },
+  "homepage": "https://github.com/PabloRubioJurado/casecraft-ecommerce#readme",
+  "dependencies": {
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/node": "^26.6.6",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}
