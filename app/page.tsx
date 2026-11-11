@@ -1,20 +1,28 @@
 import Link from 'next/link';
 
-export default function HomePage() {
+export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 text-center">
-      <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
-        Welcome to CaseCraft
-      </h1>
-      <p className="mt-4 text-lg text-gray-600 max-w-md">
-        Discover our premium selection of smartphone cases designed for ultimate protection and style.
+    <main className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
+      <h1 className="text-4xl font-bold mb-4">Bienvenido a CaseCraft</h1>
+      <p className="text-lg text-gray-600 mb-8">
+        Tu tienda de fundas y accesorios para smartphone.
       </p>
-      <div className="mt-8">
-        <Link
-          href="/products"
-          className="px-6 py-3 bg-black text-white font-medium rounded-lg shadow hover:bg-gray-800 transition"
+
+      <div className="flex gap-4">
+        {/* Enlace al Catálogo */}
+        <Link 
+          href="/products" 
+          className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition"
         >
-          Explore Catalog →
+          Ver Catálogo
+        </Link>
+
+        {/* Enlace a Iniciar Sesión / Mi Cuenta */}
+        <Link 
+          href="/login" 
+          className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+        >
+          Iniciar Sesión
         </Link>
       </div>
     </main>
