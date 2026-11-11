@@ -71,13 +71,15 @@ const PRODUCTS_DATA = [
 
 async function main() {
   console.log('Clearing existing data...');
+  await prisma.order.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.category.deleteMany({});
+  await prisma.user.deleteMany({});
 
   console.log('Seeding categories and products...');
 
   const categoryNames = Array.from(new Set(PRODUCTS_DATA.map((p) => p.category)));
-  const categoryMap: Record<string, string> = {};
+  const categoryMap: Record<string, number> = {};
 
   for (const catName of categoryNames) {
     const createdCat = await prisma.category.create({

@@ -1,7 +1,7 @@
 {
   "name": "casecraft-ecommerce",
   "version": "1.0.0",
-  "description": "Semester Project for the **E-Commerce Course (Academic Year 2026–2027)**.\r * **Current Stage:** `P1` — Team Setup and Planning (Week 3)\r * **Repository URL:** https://github.com/PabloRubioJurado/casecraft-ecommerce\r * **Release Tag:** `P1`",
+  "description": "Semester Project for the E-Commerce Course",
   "main": "index.js",
   "type": "module",
   "scripts": {
