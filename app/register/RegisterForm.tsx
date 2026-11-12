@@ -10,7 +10,7 @@ export default function RegisterForm() {
   const errors = state?.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="mt-8 space-y-4 rounded-2xl bg-white p-6 ring-1 ring-line">
+    <form action={formAction} className="mt-6 space-y-4 rounded-2xl bg-white p-4 ring-1 ring-line sm:mt-8 sm:p-6">
       <FormField label="Name (optional)" name="name" autoComplete="name" maxLength={80} defaultValue={state?.values?.name} error={errors.name} />
       <FormField label="Email" name="email" type="email" autoComplete="email" required defaultValue={state?.values?.email} error={errors.email} />
       <FormField

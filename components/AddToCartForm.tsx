@@ -9,7 +9,7 @@ export default function AddToCartForm({ productId, stock }: { productId: number;
   const soldOut = stock === 0;
 
   return (
-    <form action={formAction} className="mt-8">
+    <form action={formAction} className="mt-6 sm:mt-8">
       <input type="hidden" name="productId" value={productId} />
       <div className="flex flex-wrap items-end gap-3">
         <div>
@@ -24,13 +24,13 @@ export default function AddToCartForm({ productId, stock }: { productId: number;
             max={Math.max(stock, 1)}
             defaultValue={1}
             disabled={soldOut}
-            className="w-24 rounded-lg border border-line bg-white px-3 py-3 disabled:bg-fog"
+            className="w-20 rounded-lg border border-line bg-white px-3 py-3 text-base disabled:bg-fog sm:w-24"
           />
         </div>
         <button
           type="submit"
           disabled={soldOut || pending}
-          className="rounded-full bg-cobalt px-8 py-3.5 font-semibold text-white transition hover:bg-cobalt-dark disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
+          className="min-w-[160px] flex-1 rounded-full bg-cobalt px-6 py-3.5 font-semibold text-white transition hover:bg-cobalt-dark disabled:cursor-not-allowed disabled:bg-line disabled:text-muted sm:flex-none sm:px-8"
         >
           {soldOut ? 'Sold out' : pending ? 'Adding…' : 'Add to cart'}
         </button>

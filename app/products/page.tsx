@@ -70,13 +70,13 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const hasFilters = Boolean(searchQuery || categoryName);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-4xl">
             {categoryName || 'Shop all cases'}
           </h1>
-          <p className="mt-1 text-muted">
+          <p className="mt-1 text-sm text-muted sm:text-base">
             {searchQuery
               ? `${totalProducts} ${totalProducts === 1 ? 'result' : 'results'} for “${searchQuery}”`
               : activeMeta && categoryName === activeMeta.name
@@ -100,7 +100,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cobalt"
+            className="shrink-0 rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cobalt sm:px-5"
           >
             Search
           </button>
@@ -133,7 +133,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           <p className="mt-6 text-sm text-muted">
             Showing {startIndex + 1}–{startIndex + products.length} of {totalProducts}
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

@@ -16,11 +16,11 @@ export default async function AccountPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight">Your account</h1>
-          <p className="mt-1 text-muted">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Your account</h1>
+          <p className="mt-1 break-all text-sm text-muted sm:text-base">
             {user.name ? `${user.name} · ` : ''}
             {user.email}
           </p>
@@ -35,18 +35,18 @@ export default async function AccountPage() {
         </form>
       </div>
 
-      <h2 className="mt-10 font-display text-xl font-bold">Delivery addresses</h2>
+      <h2 className="mt-8 font-display text-xl font-bold sm:mt-10">Delivery addresses</h2>
       {addresses.length === 0 ? (
-        <p className="mt-2 text-muted">You haven’t saved an address yet. Add one below to speed up checkout.</p>
+        <p className="mt-2 text-sm text-muted sm:text-base">You haven’t saved an address yet. Add one below to speed up checkout.</p>
       ) : (
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {addresses.map((a) => (
-            <li key={a.id} className="flex flex-col rounded-2xl bg-white p-5 ring-1 ring-line">
+            <li key={a.id} className="flex flex-col rounded-2xl bg-white p-4 ring-1 ring-line sm:p-5">
               {a.isDefault && (
                 <span className="mb-2 w-fit rounded-full bg-fog px-2.5 py-1 text-xs font-medium">Default</span>
               )}
-              <p className="font-semibold">{a.fullName}</p>
-              <p className="text-sm text-muted">
+              <p className="break-words font-semibold">{a.fullName}</p>
+              <p className="break-words text-sm text-muted">
                 {a.line1}
                 {a.line2 ? `, ${a.line2}` : ''}
                 <br />
@@ -55,7 +55,7 @@ export default async function AccountPage() {
                 {countryName(a.country)}
                 {a.phone ? ` · ${a.phone}` : ''}
               </p>
-              <div className="mt-4 flex gap-2 text-sm font-medium">
+              <div className="mt-4 flex flex-wrap gap-2 text-sm font-medium">
                 {!a.isDefault && (
                   <form action={setDefaultAddressAction}>
                     <input type="hidden" name="id" value={a.id} />
@@ -76,7 +76,7 @@ export default async function AccountPage() {
         </ul>
       )}
 
-      <h2 className="mb-4 mt-10 font-display text-xl font-bold">Add an address</h2>
+      <h2 className="mb-4 mt-8 font-display text-xl font-bold sm:mt-10">Add an address</h2>
       <AddressForm />
     </div>
   );

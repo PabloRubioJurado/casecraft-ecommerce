@@ -12,35 +12,35 @@ const HERO_CASES = [
 export default function Home() {
   return (
     <>
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-14 pt-10 lg:grid-cols-[1fr_1.1fr] lg:pt-16">
+      <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-12 pt-8 sm:gap-10 sm:pb-14 sm:pt-10 lg:grid-cols-[1fr_1.1fr] lg:pt-16">
         <div>
-          <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+          <h1 className="font-display text-3xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl sm:leading-[1.05]">
             A case for every way you carry your phone.
           </h1>
-          <p className="mt-5 max-w-md text-lg text-muted">
+          <p className="mt-4 max-w-md text-base text-muted sm:mt-5 sm:text-lg">
             Clear, magnetic, rugged, eco-friendly and leather cases. Pick the material, keep your phone in one piece.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
             <Link
               href="/products"
-              className="rounded-full bg-cobalt px-6 py-3 font-semibold text-white transition hover:bg-cobalt-dark"
+              className="rounded-full bg-cobalt px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cobalt-dark sm:px-6 sm:py-3 sm:text-base"
             >
               Shop all cases
             </Link>
             <Link
               href="/login"
-              className="rounded-full px-5 py-3 font-semibold transition hover:bg-white"
+              className="rounded-full px-5 py-2.5 text-sm font-semibold transition hover:bg-white sm:py-3 sm:text-base"
             >
               Sign in
             </Link>
           </div>
         </div>
 
-        <div className="relative h-[280px] sm:h-[440px]" aria-hidden="true">
+        <div className="relative h-[240px] w-full overflow-hidden sm:h-[440px] sm:overflow-visible" aria-hidden="true">
           {HERO_CASES.map((c) => (
             <div
               key={c.kind}
-              className={`absolute w-[30%] drop-shadow-[0_18px_22px_rgba(20,24,31,0.22)] ${c.pos}`}
+              className={`absolute w-[28%] drop-shadow-[0_18px_22px_rgba(20,24,31,0.22)] sm:w-[30%] ${c.pos}`}
             >
               <CaseArt kind={c.kind} seed={c.seed} className="aspect-[1/2] w-full" />
             </div>
@@ -48,9 +48,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-20">
+      <section className="mx-auto max-w-6xl px-4 pb-16 sm:pb-20">
         <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Shop by material</h2>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <div className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
           {CATEGORIES.map((c, i) => (
             <Link
               key={c.key}
@@ -60,16 +60,16 @@ export default function Home() {
               }`}
               style={{ background: c.tint }}
             >
-              <div className="flex h-44 items-center justify-center py-4">
+              <div className="flex h-36 items-center justify-center py-3 sm:h-44 sm:py-4">
                 <CaseArt
                   kind={c.key}
                   seed={i}
                   className="aspect-[1/2] h-full transition-transform duration-300 group-hover:-translate-y-1"
                 />
               </div>
-              <div className="bg-white p-4">
-                <h3 className="font-display text-base font-bold leading-snug">{c.name}</h3>
-                <p className="mt-1 text-sm text-muted">{c.blurb}</p>
+              <div className="flex-1 bg-white p-3 sm:p-4">
+                <h3 className="font-display text-sm font-bold leading-snug sm:text-base">{c.name}</h3>
+                <p className="mt-1 text-xs text-muted sm:text-sm">{c.blurb}</p>
               </div>
             </Link>
           ))}

@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="flex min-h-screen flex-col bg-fog font-sans text-ink antialiased">
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        <main className="w-full flex-1">{children}</main>
         <SiteFooter />
       </body>
     </html>

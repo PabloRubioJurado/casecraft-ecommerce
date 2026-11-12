@@ -32,8 +32,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const lowStock = product.stock > 0 && product.stock <= 10;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-y-1 text-sm text-muted sm:mb-6">
         <Link href="/products" className="hover:text-ink">
           Shop
         </Link>
@@ -43,22 +43,24 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         </Link>
       </nav>
 
-      <div className="grid items-start gap-8 md:grid-cols-2 md:gap-12">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-3xl" style={{ background: meta.tint }}>
+      <div className="grid items-start gap-6 sm:gap-8 md:grid-cols-2 md:gap-12">
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl" style={{ background: meta.tint }}>
           <CaseArt kind={meta.key} seed={product.id} className="absolute inset-[8%]" />
         </div>
 
         <div>
-          <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">
             {product.name}
           </h1>
-          <p className="mt-3 text-3xl font-bold">{formatPrice(Number(product.price))}</p>
+          <p className="mt-2.5 text-2xl font-bold sm:mt-3 sm:text-3xl">{formatPrice(Number(product.price))}</p>
 
-          <p className="mt-6 max-w-prose leading-relaxed text-muted">{product.description}</p>
+          <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted sm:mt-6 sm:text-base">
+            {product.description}
+          </p>
 
-          <div className="mt-6 flex items-center gap-2 text-sm font-medium">
+          <div className="mt-5 flex items-center gap-2 text-sm font-medium sm:mt-6">
             <span
-              className={`h-2.5 w-2.5 rounded-full ${soldOut ? 'bg-red-500' : lowStock ? 'bg-amber-500' : 'bg-green-500'}`}
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${soldOut ? 'bg-red-500' : lowStock ? 'bg-amber-500' : 'bg-green-500'}`}
             />
             {soldOut ? 'Sold out' : lowStock ? `Only ${product.stock} left` : `In stock (${product.stock} available)`}
           </div>
