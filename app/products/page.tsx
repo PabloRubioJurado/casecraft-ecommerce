@@ -1,140 +1,181 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { prisma } from '../../lib/prisma';
 import ProductCard from '../../components/ProductCard';
+import { getCategoryMeta } from '../../lib/categories';
+
+export const metadata: Metadata = { title: 'Shop all cases' };
+
+// La página lee de la base de datos en cada petición (búsqueda, filtros, stock).
+export const dynamic = 'force-dynamic';
 
 const ITEMS_PER_PAGE = 24;
 
 interface PageProps {
-  searchParams: Promise<{ page?: string; search?: string }>;
+  searchParams: Promise<{ page?: string; search?: string; category?: string }>;
+}
+
+function buildHref({ page, category, search }: { page?: number; category?: string; search?: string }) {
+  const q = new URLSearchParams();
+  if (search) q.set('search', search);
+  if (category) q.set('category', category);
+  if (page && page > 1) q.set('page', String(page));
+  const qs = q.toString();
+  return qs ? `/products?${qs}` : '/products';
 }
 
 export default async function ProductsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const searchQuery = params.search?.trim() || '';
-  const currentPage = Math.max(1, parseInt(params.page || '1', 10));
+  const categoryName = params.category?.trim() || '';
+  const requestedPage = Number.parseInt(params.page || '1', 10);
 
-  // Filtro por nombre sensible a mayúsculas/minúsculas para PostgreSQL (Requisito A2)
-  const whereClause = searchQuery
-    ? {
-        name: {
-          contains: searchQuery,
-          mode: 'insensitive' as const,
-        },
-      }
-    : {};
+  // Filtro por nombre (A2) y por categoría; ambos con Prisma, sin SQL manual.
+  const where = {
+    ...(searchQuery ? { name: { contains: searchQuery, mode: 'insensitive' as const } } : {}),
+    ...(categoryName ? { category: { name: categoryName } } : {}),
+  };
 
-  // 1. Consulta el total de productos filtrados directamente en PostgreSQL
-  const totalProducts = await prisma.product.count({ where: whereClause });
-  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE) || 1;
+  const [categories, totalProducts] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { id: 'asc' },
+      include: { _count: { select: { products: true } } },
+    }),
+    prisma.product.count({ where }),
+  ]);
 
-  // 2. Consulta los productos de la página actual desde PostgreSQL con Prisma (Requisito A1)
+  const totalPages = Math.max(1, Math.ceil(totalProducts / ITEMS_PER_PAGE));
+  const currentPage = Math.min(Math.max(1, Number.isFinite(requestedPage) ? requestedPage : 1), totalPages);
+
   const productsFromDb = await prisma.product.findMany({
-    where: whereClause,
+    where,
     skip: (currentPage - 1) * ITEMS_PER_PAGE,
     take: ITEMS_PER_PAGE,
     include: { category: true },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { id: 'asc' },
   });
 
-  // Mapeo ligero de los datos leídos de la BD
   const products = productsFromDb.map((p) => ({
     id: p.id,
     name: p.name,
-    description: p.description,
     price: p.price,
     stock: p.stock,
     category: p.category.name,
-    image: p.image,
   }));
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + products.length;
+  const allCount = categories.reduce((sum, c) => sum + c._count.products, 0);
+  const activeMeta = categoryName ? getCategoryMeta(categoryName) : null;
+  const hasFilters = Boolean(searchQuery || categoryName);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
-      {/* Encabezado y buscador */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Smartphone Cases Catalog</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+            {categoryName || 'Shop all cases'}
+          </h1>
+          <p className="mt-1 text-muted">
             {searchQuery
-              ? `Search results for "${searchQuery}" (${totalProducts} products found)`
-              : `Showing products ${totalProducts > 0 ? startIndex + 1 : 0}–${endIndex} of ${totalProducts}`}
+              ? `${totalProducts} ${totalProducts === 1 ? 'result' : 'results'} for “${searchQuery}”`
+              : activeMeta && categoryName === activeMeta.name
+                ? activeMeta.blurb
+                : `${totalProducts} cases across ${categories.length} materials`}
           </p>
         </div>
 
-        <form method="GET" action="/products" className="flex items-center gap-2">
+        <form method="GET" action="/products" role="search" className="flex w-full items-center gap-2 md:w-auto">
+          {categoryName && <input type="hidden" name="category" value={categoryName} />}
+          <label htmlFor="search" className="sr-only">
+            Search by product name
+          </label>
           <input
-            type="text"
+            id="search"
+            type="search"
             name="search"
             defaultValue={searchQuery}
-            placeholder="Search by product name..."
-            className="px-4 py-2 border rounded-md text-sm w-64 focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Search by name"
+            className="min-w-0 flex-1 rounded-full border border-line bg-white px-4 py-2.5 text-sm md:w-64 md:flex-none"
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cobalt"
           >
             Search
           </button>
-          {searchQuery && (
-            <Link
-              href="/products"
-              className="px-3 py-2 border text-sm text-gray-600 rounded-md hover:bg-gray-100 transition"
-            >
-              Clear
-            </Link>
-          )}
         </form>
       </div>
 
-      {/* Grid de productos o aviso de "Sin resultados" */}
+      <nav aria-label="Categories" className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1">
+        {[{ name: '', label: 'All', count: allCount }, ...categories.map((c) => ({ name: c.name, label: c.name, count: c._count.products }))].map(
+          (chip) => {
+            const active = chip.name === categoryName;
+            return (
+              <Link
+                key={chip.label}
+                href={buildHref({ category: chip.name, search: searchQuery })}
+                aria-current={active ? 'page' : undefined}
+                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  active ? 'border-ink bg-ink text-white' : 'border-line bg-white hover:border-ink/40'
+                }`}
+              >
+                {chip.label}
+                <span className={`ml-1.5 ${active ? 'text-white/70' : 'text-muted'}`}>{chip.count}</span>
+              </Link>
+            );
+          },
+        )}
+      </nav>
+
       {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <p className="mt-6 text-sm text-muted">
+            Showing {startIndex + 1}–{startIndex + products.length} of {totalProducts}
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </>
       ) : (
-        <div className="text-center py-16 border rounded-lg bg-gray-50">
-          <p className="text-lg font-medium text-gray-600">No products found matching "{searchQuery}"</p>
-          <Link
-            href="/products"
-            className="inline-block mt-4 text-sm font-semibold text-black underline hover:text-gray-700"
-          >
-            Back to full catalog
-          </Link>
+        <div className="mt-8 rounded-2xl bg-white px-6 py-16 text-center ring-1 ring-line">
+          <p className="font-display text-xl font-bold">No cases match your search</p>
+          <p className="mt-1 text-muted">Try a shorter name or another material.</p>
+          {hasFilters && (
+            <Link
+              href="/products"
+              className="mt-5 inline-block rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cobalt"
+            >
+              Clear filters
+            </Link>
+          )}
         </div>
       )}
 
-      {/* Paginación dinámica */}
       {totalPages > 1 && (
-        <div className="mt-12 flex items-center justify-center gap-2">
+        <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2 text-sm font-medium">
           {currentPage > 1 ? (
             <Link
-              href={`/products?page=${currentPage - 1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
-              className="px-4 py-2 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
+              href={buildHref({ page: currentPage - 1, category: categoryName, search: searchQuery })}
+              className="rounded-full border border-line bg-white px-4 py-2 transition hover:border-ink/40"
             >
-              ← Previous
+              Previous
             </Link>
           ) : (
-            <span className="px-4 py-2 border rounded-md text-sm font-medium text-gray-300 bg-gray-50 cursor-not-allowed">
-              ← Previous
-            </span>
+            <span className="rounded-full border border-line px-4 py-2 text-muted/50">Previous</span>
           )}
 
           {Array.from({ length: totalPages }).map((_, i) => {
             const pageNumber = i + 1;
-            const isActive = pageNumber === currentPage;
-
+            const active = pageNumber === currentPage;
             return (
               <Link
                 key={pageNumber}
-                href={`/products?page=${pageNumber}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
-                className={`px-3.5 py-2 rounded-md text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-black text-white'
-                    : 'bg-white border text-gray-700 hover:bg-gray-50'
+                href={buildHref({ page: pageNumber, category: categoryName, search: searchQuery })}
+                aria-current={active ? 'page' : undefined}
+                className={`min-w-10 rounded-full px-3.5 py-2 text-center transition ${
+                  active ? 'bg-ink text-white' : 'border border-line bg-white hover:border-ink/40'
                 }`}
               >
                 {pageNumber}
@@ -144,18 +185,16 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
           {currentPage < totalPages ? (
             <Link
-              href={`/products?page=${currentPage + 1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
-              className="px-4 py-2 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
+              href={buildHref({ page: currentPage + 1, category: categoryName, search: searchQuery })}
+              className="rounded-full border border-line bg-white px-4 py-2 transition hover:border-ink/40"
             >
-              Next →
+              Next
             </Link>
           ) : (
-            <span className="px-4 py-2 border rounded-md text-sm font-medium text-gray-300 bg-gray-50 cursor-not-allowed">
-              Next →
-            </span>
+            <span className="rounded-full border border-line px-4 py-2 text-muted/50">Next</span>
           )}
-        </div>
+        </nav>
       )}
-    </main>
+    </div>
   );
 }

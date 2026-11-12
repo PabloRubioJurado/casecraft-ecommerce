@@ -62,3 +62,19 @@ Semester Project for the **E-Commerce Course (Academic Year 2026–2027)**.
 1. Copy the environment variables template:
    ```bash
    cp .env.example .env
+2. Start PostgreSQL in Docker:
+   ```bash
+   docker compose up -d
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Create the tables and load the seed data:
+   ```bash
+   npm run db:push && npm run db:seed
+   ```
+5. Start the development server (http://localhost:3000):
+   ```bash
+   npm run dev
+   ```

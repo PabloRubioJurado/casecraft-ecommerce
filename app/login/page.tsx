@@ -1,33 +1,45 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
-export default async function ProfilePage() {
+export const metadata: Metadata = { title: 'Sign in' };
+
+// TODO (A4): conectar con el registro/login real (Argon2/bcrypt + sesión).
+// Hasta entonces el formulario queda desactivado para no simular un login que no existe.
+export default function LoginPage() {
   return (
-    <main className="max-w-3xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">Mi Cuenta (A4 - User Accounts)</h1>
-      <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-        <p className="text-gray-700 mb-2"><strong>Estado:</strong> Autenticado</p>
-        <p className="text-gray-700 mb-4"><strong>Dirección de entrega guardada:</strong> Calle Principal 123, Madrid</p>
-        
-        <div className="mt-6 flex flex-wrap gap-4">
-          <button type="button" className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
-            Actualizar Dirección
-          </button>
-          
-          {/* Botón para navegar a la primera página del Catálogo */}
-          <Link 
-            href="/products" 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center"
-          >
-            Ir al Catálogo
-          </Link>
+    <div className="mx-auto max-w-md px-4 py-14">
+      <h1 className="font-display text-3xl font-extrabold tracking-tight">Sign in</h1>
+      <p className="mt-2 text-muted">Accounts are coming soon. You can still browse the full catalog.</p>
 
-          <form action="/api/auth/logout" method="POST">
-            <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-              Cerrar Sesión
-            </button>
-          </form>
-        </div>
-      </div>
-    </main>
+      <form className="mt-8 space-y-4 rounded-2xl bg-white p-6 ring-1 ring-line">
+        <fieldset disabled className="space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-1 block text-sm font-medium">
+              Email
+            </label>
+            <input id="email" type="email" className="w-full rounded-lg border border-line bg-fog px-3 py-2.5" />
+          </div>
+          <div>
+            <label htmlFor="password" className="mb-1 block text-sm font-medium">
+              Password
+            </label>
+            <input id="password" type="password" className="w-full rounded-lg border border-line bg-fog px-3 py-2.5" />
+          </div>
+          <button
+            type="button"
+            className="w-full rounded-full bg-line px-6 py-3 font-semibold text-muted"
+          >
+            Sign in
+          </button>
+        </fieldset>
+      </form>
+
+      <Link
+        href="/products"
+        className="mt-6 inline-block rounded-full bg-cobalt px-6 py-3 font-semibold text-white transition hover:bg-cobalt-dark"
+      >
+        Browse all cases
+      </Link>
+    </div>
   );
 }

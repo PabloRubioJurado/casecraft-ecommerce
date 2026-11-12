@@ -1,3 +1,31 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #14181f;
+  --color-fog: #f1f3f6;
+  --color-line: #dfe3e9;
+  --color-muted: #5b6472;
+  --color-cobalt: #2d4bf0;
+  --color-cobalt-dark: #1f37c4;
+}
+
+@theme inline {
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

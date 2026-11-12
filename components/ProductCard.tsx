@@ -1,32 +1,36 @@
 import Link from 'next/link';
+import CaseArt from './CaseArt';
+import { getCategoryMeta } from '../lib/categories';
+import { formatPrice } from '../lib/format';
+import type { ProductCardData } from '../types/product';
 
-export default function ProductCard({ product }: { product: any }) {
-  // Solución al crash: Convertimos el Decimal de Prisma a número nativo de forma segura
-  const safePrice = Number(product.price).toFixed(2);
+export default function ProductCard({ product }: { product: ProductCardData }) {
+  const meta = getCategoryMeta(product.category);
+  const soldOut = product.stock === 0;
+  const lowStock = product.stock > 0 && product.stock <= 10;
 
   return (
-    <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between bg-white h-full">
-      <div>
-        {/* Placeholder de imagen de Darío */}
-        <div className="w-full h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center text-gray-500 font-semibold text-center px-4">
-          <span>{product.name}</span>
-        </div>
-        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-          {product.category}
-        </span>
-        <h3 className="text-lg font-bold mt-1 text-gray-900 leading-tight">{product.name}</h3>
-        <p className="text-sm text-gray-600 line-clamp-2 mt-2">{product.description}</p>
+    <Link
+      href={`/products/${product.id}`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-line transition hover:ring-ink/30"
+    >
+      <div className="relative aspect-[4/5]" style={{ background: meta.tint }}>
+        <CaseArt
+          kind={meta.key}
+          seed={product.id}
+          className="absolute inset-[9%] transition-transform duration-300 group-hover:-translate-y-1"
+        />
+        {(soldOut || lowStock) && (
+          <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-medium">
+            {soldOut ? 'Sold out' : `Only ${product.stock} left`}
+          </span>
+        )}
       </div>
-
-      <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-        <span className="text-xl font-bold text-gray-900">{safePrice} €</span>
-        <Link 
-          href={`/products/${product.id}`}
-          className="px-3 py-1.5 bg-black text-white text-sm font-medium rounded hover:bg-gray-800 transition"
-        >
-          Ver detalles
-        </Link>
+      <div className="flex flex-1 flex-col gap-1 p-4">
+        <span className="text-xs text-muted">{product.category}</span>
+        <h3 className="font-display text-base font-bold leading-snug">{product.name}</h3>
+        <p className="mt-auto pt-3 text-lg font-bold">{formatPrice(product.price)}</p>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -12,9 +12,6 @@
     "db:seed": "prisma db seed",
     "db:push": "prisma db push"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PabloRubioJurado/casecraft-ecommerce.git"
@@ -29,6 +26,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "dotenv": "^17.0.0",
     "next": "^16.4.6",
     "pg": "^8.23.1",
     "react": "^19.3.1",
