@@ -29,7 +29,7 @@ export default async function SiteHeader() {
           CaseCraft
         </Link>
 
-        <nav className="flex items-center gap-0.5 text-xs font-medium sm:gap-1 sm:text-sm">
+        <nav className="flex flex-wrap items-center gap-0.5 text-xs font-medium sm:gap-1 sm:text-sm">
           <Link
             href="/products"
             className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
@@ -49,6 +49,12 @@ export default async function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link
+                href="/orders"
+                className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+              >
+                Orders
+              </Link>
               <Link
                 href="/account"
                 className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"

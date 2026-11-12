@@ -6,6 +6,7 @@ import { cartTotals, fromCents, lineTotalCents } from '../../lib/cart';
 import { getCategoryMeta } from '../../lib/categories';
 import { formatPrice } from '../../lib/format';
 import CaseArt from '../../components/CaseArt';
+import CheckoutButton from '../../components/CheckoutButton';
 import { removeCartItemAction } from '../actions/cart';
 import CartQuantityForm from './CartQuantityForm';
 
@@ -24,6 +25,13 @@ export default async function CartPage() {
   const lines = items.map((i) => ({ ...i, unitPrice: Number(i.product.price) }));
   const totals = cartTotals(lines);
   const hasProblem = items.some((i) => !i.product.active || i.quantity > i.product.stock);
+
+  // Preparamos objetos planos (sin Decimals de Prisma) con el formato que espera Stripe
+  const checkoutItems = lines.map((l) => ({
+    name: l.product.name,
+    price: l.unitPrice,
+    quantity: l.quantity,
+  }));
 
   if (items.length === 0) {
     return (
@@ -110,14 +118,20 @@ export default async function CartPage() {
           </dl>
           <p className="mt-2 text-xs text-muted">Shipping is added at checkout.</p>
           {hasProblem && <p className="mt-3 text-sm text-red-600">Fix the items marked above to continue.</p>}
-          {/* TODO (A5/A6): enlazar con el checkout cuando exista */}
-          <button
-            type="button"
-            disabled
-            className="mt-5 w-full cursor-not-allowed rounded-full bg-line px-6 py-3 font-semibold text-muted"
-          >
-            Checkout (coming soon)
-          </button>
+          
+          <div className="mt-5">
+            {hasProblem ? (
+              <button
+                type="button"
+                disabled
+                className="w-full cursor-not-allowed rounded-full bg-line px-6 py-3 font-semibold text-muted"
+              >
+                Checkout unavailable
+              </button>
+            ) : (
+              <CheckoutButton items={checkoutItems} />
+            )}
+          </div>
         </aside>
       </div>
     </div>
