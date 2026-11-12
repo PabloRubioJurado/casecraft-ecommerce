@@ -9,12 +9,45 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  New
+  Paid
+  Shipped
+  Delivered
+  Cancelled
+}
+
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  address  String?
-  orders   Order[]
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String // Argon2/bcrypt (A4): nunca se guarda la contraseña en claro
+  name         String?
+  role         Role      @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  addresses    Address[]
+  cart         Cart?
+  orders       Order[]
+}
+
+model Address {
+  id         Int     @id @default(autoincrement())
+  userId     Int
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName   String
+  line1      String
+  line2      String?
+  city       String
+  postalCode String
+  country    String  @default("ES")
+  phone      String?
+  isDefault  Boolean @default(false)
+
+  @@index([userId])
 }
 
 model Category {
@@ -24,22 +57,74 @@ model Category {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String
-  price       Float
-  image       String   @default("/placeholder.png")
+  price       Decimal     @db.Decimal(10, 2) // dinero: nunca Float
+  image       String      @default("/placeholder.png")
   stock       Int
+  active      Boolean     @default(true) // el admin "borra" desactivando, para no romper pedidos antiguos
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now())
+  category    Category    @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  @@index([categoryId])
+}
+
+// Carrito persistente (A3): vive en la BD ligado al usuario, así sobrevive al cierre de sesión.
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+
+  @@unique([cartId, productId])
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  status    String   @default("New")
-  total     Float
-  createdAt DateTime @default(now())
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  user            User        @relation(fields: [userId], references: [id])
+  status          OrderStatus @default(New)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  shippingMethod  String // p. ej. "standard" | "express" (A5: 2+ opciones)
+  shippingCost    Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  // Copia de la dirección en el momento de comprar (el usuario puede editarla después)
+  shipFullName    String
+  shipLine1       String
+  shipLine2       String?
+  shipCity        String
+  shipPostalCode  String
+  shipCountry     String
+  stripeSessionId String?     @unique // para casar el webhook con el pedido (A6)
+  paidAt          DateTime?
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product @relation(fields: [productId], references: [id])
+  productName String // copia del nombre y precio al comprar
+  unitPrice   Decimal @db.Decimal(10, 2)
+  quantity    Int
 }

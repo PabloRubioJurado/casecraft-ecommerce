@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { getCurrentUser } from '../lib/auth';
+import { prisma } from '../lib/prisma';
+import { logoutAction } from '../app/actions/auth';
 
 function LogoMark() {
   return (
@@ -9,7 +12,12 @@ function LogoMark() {
   );
 }
 
-export default function SiteHeader() {
+export default async function SiteHeader() {
+  const user = await getCurrentUser();
+  const cartCount = user
+    ? ((await prisma.cartItem.aggregate({ _sum: { quantity: true }, where: { cart: { userId: user.id } } }))._sum.quantity ?? 0)
+    : 0;
+
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -21,9 +29,25 @@ export default function SiteHeader() {
           <Link href="/products" className="rounded-full px-4 py-2 transition hover:bg-fog">
             Shop
           </Link>
-          <Link href="/login" className="rounded-full bg-ink px-4 py-2 text-white transition hover:bg-cobalt">
-            Sign in
+          <Link href="/cart" className="rounded-full px-4 py-2 transition hover:bg-fog">
+            Cart{cartCount > 0 && <span className="ml-1.5 rounded-full bg-cobalt px-2 py-0.5 text-xs text-white">{cartCount}</span>}
           </Link>
+          {user ? (
+            <>
+              <Link href="/account" className="rounded-full px-4 py-2 transition hover:bg-fog">
+                Account
+              </Link>
+              <form action={logoutAction}>
+                <button type="submit" className="rounded-full bg-ink px-4 py-2 text-white transition hover:bg-cobalt">
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/login" className="rounded-full bg-ink px-4 py-2 text-white transition hover:bg-cobalt">
+              Sign in
+            </Link>
+          )}
         </nav>
       </div>
     </header>

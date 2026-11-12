@@ -32,6 +32,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
   // Filtro por nombre (A2) y por categoría; ambos con Prisma, sin SQL manual.
   const where = {
+    active: true,
     ...(searchQuery ? { name: { contains: searchQuery, mode: 'insensitive' as const } } : {}),
     ...(categoryName ? { category: { name: categoryName } } : {}),
   };
@@ -39,7 +40,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const [categories, totalProducts] = await Promise.all([
     prisma.category.findMany({
       orderBy: { id: 'asc' },
-      include: { _count: { select: { products: true } } },
+      include: { _count: { select: { products: { where: { active: true } } } } },
     }),
     prisma.product.count({ where }),
   ]);
@@ -58,7 +59,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const products = productsFromDb.map((p) => ({
     id: p.id,
     name: p.name,
-    price: p.price,
+    price: Number(p.price),
     stock: p.stock,
     category: p.category.name,
   }));

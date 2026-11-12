@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import bcrypt from 'bcryptjs';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -71,7 +72,11 @@ const PRODUCTS_DATA = [
 
 async function main() {
   console.log('Clearing existing data...');
+  await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
+  await prisma.cartItem.deleteMany({});
+  await prisma.cart.deleteMany({});
+  await prisma.address.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.category.deleteMany({});
   await prisma.user.deleteMany({});
@@ -100,6 +105,19 @@ async function main() {
       },
     });
   }
+
+  // Usuario administrador para desarrollo. Cambia la contraseña con SEED_ADMIN_PASSWORD en .env.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@casecraft.test';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Admin1234!';
+  await prisma.user.create({
+    data: {
+      email: adminEmail,
+      name: 'Admin',
+      role: 'ADMIN',
+      passwordHash: await bcrypt.hash(adminPassword, 12),
+    },
+  });
+  console.log(`Admin user created: ${adminEmail}`);
 
   console.log('Seed completed successfully! 50 products loaded.');
 }
