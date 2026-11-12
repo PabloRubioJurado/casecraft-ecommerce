@@ -34,6 +34,9 @@ export default async function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link href="/orders" className="rounded-full px-4 py-2 transition hover:bg-fog">
+                Orders
+              </Link>
               <Link href="/account" className="rounded-full px-4 py-2 transition hover:bg-fog">
                 Account
               </Link>
