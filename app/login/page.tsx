@@ -10,7 +10,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
   const safeNext = safeRedirectPath(next);
 
-  if (await getCurrentUser()) redirect(safeNext);
+  const user = await getCurrentUser();
+  if (user) {
+    redirect(user.role === 'ADMIN' ? '/admin' : safeNext);
+  }
 
   return (
     <div className="mx-auto max-w-md px-4 py-10 sm:py-14">

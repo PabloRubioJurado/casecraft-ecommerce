@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import Stripe from 'stripe';
 import { prisma } from '../../../lib/prisma';
 import { requireUser } from '../../../lib/auth';
 import { formatPrice } from '../../../lib/format';
@@ -14,94 +13,39 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
   const user = await requireUser('/cart');
   const { session_id } = await searchParams;
 
-  if (!session_id || !process.env.STRIPE_SECRET_KEY) {
+  if (!session_id) {
     redirect('/cart');
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-  let session: Stripe.Checkout.Session;
-  try {
-    session = await stripe.checkout.sessions.retrieve(session_id);
-  } catch (error) {
-    console.error('Error retrieving Stripe session:', error);
-    redirect('/cart');
-  }
-
-  if (session.payment_status !== 'paid') {
-    redirect('/cart');
-  }
-
-  const amountPaid = (session.amount_total ?? 0) / 100;
-
-  // Buscamos si el pedido ya fue registrado para evitar duplicados al recargar
-  let order = await prisma.order.findUnique({
-    where: { stripeSessionId: session.id },
+  const order = await prisma.order.findFirst({
+    where: {
+      stripeSessionId: session_id,
+      userId: user.id,
+    },
   });
 
   if (!order) {
-    order = await prisma.$transaction(async (tx) => {
-      const cartItems = await tx.cartItem.findMany({
-        where: { cart: { userId: user.id } },
-        include: { product: true },
-      });
-
-      if (cartItems.length === 0) {
-        return null;
-      }
-
-      const defaultAddress = await tx.address.findFirst({
-        where: { userId: user.id },
-        orderBy: { isDefault: 'desc' },
-      });
-
-      const createdOrder = await tx.order.create({
-        data: {
-          userId: user.id,
-          status: 'Paid',
-          subtotal: amountPaid,
-          shippingMethod: 'standard',
-          shippingCost: 0,
-          total: amountPaid,
-          shipFullName: defaultAddress?.fullName || user.name || user.email,
-          shipLine1: defaultAddress?.line1 || 'Standard delivery',
-          shipLine2: defaultAddress?.line2 ?? null,
-          shipCity: defaultAddress?.city || 'Madrid',
-          shipPostalCode: defaultAddress?.postalCode || '28001',
-          shipCountry: defaultAddress?.country || 'ES',
-          stripeSessionId: session.id,
-          paidAt: new Date(),
-          items: {
-            create: cartItems.map((item) => ({
-              productId: item.productId,
-              productName: item.product.name,
-              unitPrice: item.product.price,
-              quantity: item.quantity,
-            })),
-          },
-        },
-      });
-
-      for (const item of cartItems) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { decrement: item.quantity },
-          },
-        });
-      }
-
-      await tx.cartItem.deleteMany({
-        where: { cart: { userId: user.id } },
-      });
-
-      return createdOrder;
-    });
+    redirect('/cart');
   }
 
-  const orderReference = order
-    ? `#CC-${String(order.id).padStart(5, '0')}`
-    : session.id.slice(-8).toUpperCase();
+  // El webhook es el único que pasa el pedido a 'Paid' (A6)
+  if (order.status === 'New') {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-24 text-center">
+        <RefreshOnMount />
+        <meta httpEquiv="refresh" content="2" />
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-line border-t-cobalt" />
+        <h1 className="mt-6 font-display text-2xl font-extrabold text-gray-900">
+          Confirming your payment...
+        </h1>
+        <p className="mt-2 text-sm text-muted">
+          Waiting for Stripe webhook confirmation. This page will update automatically.
+        </p>
+      </div>
+    );
+  }
+
+  const orderReference = `#CC-${String(order.id).padStart(5, '0')}`;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-20 text-center">
@@ -117,7 +61,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
         Payment confirmed
       </h1>
       <p className="mt-2 text-muted">
-        Thank you for your order. Your payment has been processed and product stock has been updated.
+        Thank you for your purchase. Your order has been recorded and stock has been updated.
       </p>
 
       <div className="mt-8 space-y-3 rounded-2xl bg-white p-6 text-left text-sm ring-1 ring-line">
@@ -130,8 +74,20 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
           <span className="font-semibold text-green-700">Paid</span>
         </div>
         <div className="flex justify-between">
+          <span className="text-muted">Delivery method</span>
+          <span className="font-medium capitalize text-gray-900">
+            {order.shippingMethod} ({formatPrice(Number(order.shippingCost))})
+          </span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="shrink-0 text-muted">Deliver to</span>
+          <span className="text-right font-medium text-gray-900">
+            {order.shipFullName}, {order.shipLine1}, {order.shipCity}
+          </span>
+        </div>
+        <div className="flex justify-between border-t border-line pt-3">
           <span className="text-muted">Total paid</span>
-          <span className="font-bold text-gray-900">{formatPrice(amountPaid)}</span>
+          <span className="font-bold text-gray-900">{formatPrice(Number(order.total))}</span>
         </div>
       </div>
 

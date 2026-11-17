@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { prisma } from '../../lib/prisma';
 import { requireUser } from '../../lib/auth';
@@ -10,6 +11,8 @@ export const metadata: Metadata = { title: 'Your account' };
 
 export default async function AccountPage() {
   const user = await requireUser('/account');
+  if (user.role === 'ADMIN') redirect('/admin');
+
   const addresses = await prisma.address.findMany({
     where: { userId: user.id },
     orderBy: [{ isDefault: 'desc' }, { id: 'asc' }],

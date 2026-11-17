@@ -8,18 +8,32 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   const meta = getCategoryMeta(product.category);
   const soldOut = product.stock === 0;
   const lowStock = product.stock > 0 && product.stock <= 10;
+  const hasUploadedImage =
+    Boolean(product.image) &&
+    product.image !== '/placeholder.png' &&
+    product.image !== '';
+
+  const hasReviews = Boolean(product.reviewCount && product.reviewCount > 0 && product.averageRating !== null && product.averageRating !== undefined);
 
   return (
     <Link
       href={`/products/${product.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-line transition hover:ring-ink/30"
     >
-      <div className="relative aspect-[4/5]" style={{ background: meta.tint }}>
-        <CaseArt
-          kind={meta.key}
-          seed={product.id}
-          className="absolute inset-[9%] transition-transform duration-300 group-hover:-translate-y-1"
-        />
+      <div className="relative aspect-[4/5] overflow-hidden" style={{ background: meta.tint }}>
+        {hasUploadedImage ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <CaseArt
+            kind={meta.key}
+            seed={product.id}
+            className="absolute inset-[9%] transition-transform duration-300 group-hover:-translate-y-1"
+          />
+        )}
         {(soldOut || lowStock) && (
           <span className="absolute left-2.5 top-2.5 rounded-full bg-white px-2 py-0.5 text-[11px] font-medium sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
             {soldOut ? 'Sold out' : `Only ${product.stock} left`}
@@ -29,6 +43,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <span className="truncate text-[11px] text-muted sm:text-xs">{product.category}</span>
         <h3 className="font-display text-sm font-bold leading-snug sm:text-base">{product.name}</h3>
+        {hasReviews && (
+          <div className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-amber-600">
+            <span aria-hidden="true">★</span>
+            <span>{product.averageRating!.toFixed(1)}</span>
+            <span className="font-normal text-muted">({product.reviewCount})</span>
+          </div>
+        )}
         <p className="mt-auto pt-2 text-base font-bold sm:pt-3 sm:text-lg">{formatPrice(product.price)}</p>
       </div>
     </Link>

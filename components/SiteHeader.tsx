@@ -14,15 +14,28 @@ function LogoMark() {
 
 export default async function SiteHeader() {
   const user = await getCurrentUser();
-  const cartCount = user
-    ? ((await prisma.cartItem.aggregate({ _sum: { quantity: true }, where: { cart: { userId: user.id } } }))._sum.quantity ?? 0)
-    : 0;
+  const isAdmin = user?.role === 'ADMIN';
+
+  const [cartCount, wishlistCount] =
+    user && !isAdmin
+      ? await Promise.all([
+          prisma.cartItem
+            .aggregate({
+              _sum: { quantity: true },
+              where: { cart: { userId: user.id } },
+            })
+            .then((res) => res._sum.quantity ?? 0),
+          prisma.wishlistItem.count({
+            where: { userId: user.id },
+          }),
+        ])
+      : [0, 0];
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
       <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-2 px-3 py-2 sm:px-4">
         <Link
-          href="/"
+          href={isAdmin ? '/admin' : '/'}
           className="flex shrink-0 items-center gap-1.5 font-display text-lg font-extrabold tracking-tight sm:gap-2 sm:text-xl"
         >
           <LogoMark />
@@ -30,36 +43,13 @@ export default async function SiteHeader() {
         </Link>
 
         <nav className="flex flex-wrap items-center gap-0.5 text-xs font-medium sm:gap-1 sm:text-sm">
-          <Link
-            href="/products"
-            className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
-          >
-            Shop
-          </Link>
-          <Link
-            href="/cart"
-            className="flex items-center rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
-          >
-            <span>Cart</span>
-            {cartCount > 0 && (
-              <span className="ml-1 rounded-full bg-cobalt px-1.5 py-0.5 text-[11px] leading-none text-white sm:ml-1.5 sm:px-2 sm:text-xs">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          {user ? (
+          {isAdmin ? (
             <>
               <Link
-                href="/orders"
-                className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+                href="/admin"
+                className="rounded-full bg-cobalt/10 px-2.5 py-1.5 font-semibold text-cobalt transition hover:bg-cobalt/20 sm:px-4 sm:py-2"
               >
-                Orders
-              </Link>
-              <Link
-                href="/account"
-                className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
-              >
-                Account
+                Admin
               </Link>
               <form action={logoutAction}>
                 <button
@@ -71,12 +61,69 @@ export default async function SiteHeader() {
               </form>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-white transition hover:bg-cobalt sm:px-4 sm:py-2"
-            >
-              Sign in
-            </Link>
+            <>
+              <Link
+                href="/products"
+                className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+              >
+                Shop
+              </Link>
+              {user && (
+                <Link
+                  href="/wishlist"
+                  className="flex items-center rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+                >
+                  <span>Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span className="ml-1 rounded-full bg-ink/10 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink sm:ml-1.5 sm:px-2 sm:text-xs">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+              <Link
+                href="/cart"
+                className="flex items-center rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+              >
+                <span>Cart</span>
+                {cartCount > 0 && (
+                  <span className="ml-1 rounded-full bg-cobalt px-1.5 py-0.5 text-[11px] leading-none text-white sm:ml-1.5 sm:px-2 sm:text-xs">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/orders"
+                    className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    href="/account"
+                    className="rounded-full px-2.5 py-1.5 transition hover:bg-fog sm:px-4 sm:py-2"
+                  >
+                    Account
+                  </Link>
+                  <form action={logoutAction}>
+                    <button
+                      type="submit"
+                      className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-white transition hover:bg-cobalt sm:px-4 sm:py-2"
+                    >
+                      Sign out
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-white transition hover:bg-cobalt sm:px-4 sm:py-2"
+                >
+                  Sign in
+                </Link>
+              )}
+            </>
           )}
         </nav>
       </div>

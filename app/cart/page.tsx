@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { prisma } from '../../lib/prisma';
 import { requireUser } from '../../lib/auth';
@@ -14,6 +15,7 @@ export const metadata: Metadata = { title: 'Your cart' };
 
 export default async function CartPage() {
   const user = await requireUser('/cart');
+  if (user.role === 'ADMIN') redirect('/admin');
 
   const items = await prisma.cartItem.findMany({
     where: { cart: { userId: user.id } },
@@ -25,13 +27,6 @@ export default async function CartPage() {
   const lines = items.map((i) => ({ ...i, unitPrice: Number(i.product.price) }));
   const totals = cartTotals(lines);
   const hasProblem = items.some((i) => !i.product.active || i.quantity > i.product.stock);
-
-  // Preparamos objetos planos (sin Decimals de Prisma) con el formato que espera Stripe
-  const checkoutItems = lines.map((l) => ({
-    name: l.product.name,
-    price: l.unitPrice,
-    quantity: l.quantity,
-  }));
 
   if (items.length === 0) {
     return (
@@ -129,7 +124,7 @@ export default async function CartPage() {
                 Checkout unavailable
               </button>
             ) : (
-              <CheckoutButton items={checkoutItems} />
+              <CheckoutButton />
             )}
           </div>
         </aside>

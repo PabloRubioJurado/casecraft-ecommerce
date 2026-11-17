@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import CaseArt from '../components/CaseArt';
 import { CATEGORIES } from '../lib/categories';
+import { getCurrentUser } from '../lib/auth';
 
 const HERO_CASES = [
   { kind: 'rugged', seed: 1, pos: 'left-0 top-[14%] z-10 -rotate-6' },
@@ -9,7 +11,10 @@ const HERO_CASES = [
   { kind: 'leather', seed: 0, pos: 'left-[69%] top-[2%] z-20 rotate-6' },
 ] as const;
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+  if (user?.role === 'ADMIN') redirect('/admin');
+
   return (
     <>
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-12 pt-8 sm:gap-10 sm:pb-14 sm:pt-10 lg:grid-cols-[1fr_1.1fr] lg:pt-16">

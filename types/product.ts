@@ -1,5 +1,3 @@
-// types/product.ts
-// El id es numérico porque en prisma/schema.prisma es `Int @id @default(autoincrement())`.
 export interface Product {
   id: number;
   name: string;
@@ -10,4 +8,7 @@ export interface Product {
   stock: number;
 }
 
-export type ProductCardData = Pick<Product, 'id' | 'name' | 'price' | 'category' | 'stock'>;
+export type ProductCardData = Pick<Product, 'id' | 'name' | 'price' | 'category' | 'stock' | 'image'> & {
+  averageRating?: number | null;
+  reviewCount?: number;
+};

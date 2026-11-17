@@ -1,12 +1,43 @@
 import Link from 'next/link';
+import { revalidatePath } from 'next/cache';
 import type { Metadata } from 'next';
+import type { OrderStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { requireUser } from '../../lib/auth';
 import { getCategoryMeta } from '../../lib/categories';
 import { formatPrice } from '../../lib/format';
 import CaseArt from '../../components/CaseArt';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = { title: 'Your orders' };
+
+const STATUS_STYLES: Record<OrderStatus, { label: string; className: string }> = {
+  New: { label: 'New · Unpaid', className: 'bg-amber-100 text-amber-800' },
+  Paid: { label: 'Paid', className: 'bg-green-100 text-green-800' },
+  Shipped: { label: 'Shipped', className: 'bg-blue-100 text-blue-800' },
+  Delivered: { label: 'Delivered', className: 'bg-emerald-100 text-emerald-800' },
+  Cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-800' },
+};
+
+async function cancelUnpaidOrderAction(formData: FormData) {
+  'use server';
+  const user = await requireUser('/orders');
+  if (user.role === 'ADMIN') redirect('/admin/orders');
+  const orderId = Number(formData.get('orderId'));
+
+  await prisma.order.updateMany({
+    where: {
+      id: orderId,
+      userId: user.id,
+      status: 'New',
+    },
+    data: {
+      status: 'Cancelled',
+    },
+  });
+
+  revalidatePath('/orders');
+}
 
 export default async function OrdersPage() {
   const user = await requireUser('/orders');
@@ -53,6 +84,7 @@ export default async function OrdersPage() {
             month: 'long',
             day: 'numeric',
           }).format(order.createdAt);
+          const badge = STATUS_STYLES[order.status];
 
           return (
             <article key={order.id} className="overflow-hidden rounded-2xl bg-white ring-1 ring-line">
@@ -72,9 +104,23 @@ export default async function OrdersPage() {
                   </div>
                 </div>
 
-                <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-                  {order.status}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
+                    {badge.label}
+                  </span>
+
+                  {order.status === 'New' && (
+                    <form action={cancelUnpaidOrderAction}>
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <button
+                        type="submit"
+                        className="rounded-full border border-line bg-white px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100"
+                      >
+                        Cancel
+                      </button>
+                    </form>
+                  )}
+                </div>
               </div>
 
               <ul className="divide-y divide-line px-6">

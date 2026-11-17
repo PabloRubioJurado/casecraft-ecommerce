@@ -53,7 +53,10 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   const next = safeRedirectPath(text(formData, 'next'));
 
   const user = isValidEmail(email)
-    ? await prisma.user.findUnique({ where: { email }, select: { id: true, passwordHash: true } })
+    ? await prisma.user.findUnique({
+        where: { email },
+        select: { id: true, passwordHash: true, role: true },
+      })
     : null;
 
   // Se compara siempre contra un hash, exista o no el usuario.
@@ -63,7 +66,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   }
 
   await createSession(user.id);
-  redirect(next);
+  redirect(user.role === 'ADMIN' && !next.startsWith('/admin') ? '/admin' : next);
 }
 
 export async function logoutAction() {
