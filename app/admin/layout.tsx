@@ -53,6 +53,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           >
             Reviews
           </Link>
+          <Link
+            href="/admin/users"
+            className="rounded-full border border-line bg-white px-4 py-2 text-gray-900 transition hover:bg-fog"
+          >
+            Users
+          </Link>
           <span className="ml-2 hidden text-xs font-normal text-muted sm:inline">
             Signed in as {admin.email}
           </span>

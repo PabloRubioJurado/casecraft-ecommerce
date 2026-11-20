@@ -24,10 +24,29 @@ export async function createSession(userId: number) {
     path: '/',
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
+
+  await prisma.user
+    .update({
+      where: { id: userId },
+      data: { lastActiveAt: new Date() },
+    })
+    .catch(() => {});
 }
 
 export async function destroySession() {
   const store = await cookies();
+  const token = store.get(COOKIE_NAME)?.value;
+  if (token) {
+    const userId = verifyToken(token);
+    if (userId) {
+      await prisma.user
+        .update({
+          where: { id: userId },
+          data: { lastActiveAt: null },
+        })
+        .catch(() => {});
+    }
+  }
   store.delete(COOKIE_NAME);
 }
 
@@ -40,10 +59,29 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const userId = verifyToken(token);
   if (!userId) return null;
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, role: true },
+    select: { id: true, email: true, name: true, role: true, lastActiveAt: true },
   });
+
+  if (!user) return null;
+
+  const now = new Date();
+  if (!user.lastActiveAt || now.getTime() - user.lastActiveAt.getTime() > 60_000) {
+    await prisma.user
+      .update({
+        where: { id: user.id },
+        data: { lastActiveAt: now },
+      })
+      .catch(() => {});
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  };
 });
 
 /** Exige sesión; si no hay, redirige al login y vuelve después a `next`. */
